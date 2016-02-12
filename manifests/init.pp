@@ -70,6 +70,11 @@ class rabbitmq(
   $config_management_variables = $rabbitmq::config_management_variables,
   $auth_backends              = $rabbitmq::params::auth_backends,
   $key_content                = undef,
+
+  ### START Hiera Lookups ###
+  $users            = hiera_hash('rabbitmq::rabbitmq_user', {}),
+  $user_permissions = hiera_hash('rabbitmq::rabbitmq_user_permissions', {}),
+  ### END Hiera Lookups ###
 ) inherits rabbitmq::params {
 
   validate_bool($admin_enable)
@@ -270,6 +275,11 @@ class rabbitmq(
   # http://docs.puppetlabs.com/puppet/2.7/reference/lang_containment.html#known-issues
   anchor { 'rabbitmq::begin': }
   anchor { 'rabbitmq::end': }
+
+  # handle resources for hiera
+
+  create_resources('rabbitmq::rabbitmq_user', $users)
+  create_resources('rabbitmq::rabbitmq_user_permissions', $user_permissions)
 
   Anchor['rabbitmq::begin'] -> Class['::rabbitmq::install']
     -> Class['::rabbitmq::config'] ~> Class['::rabbitmq::service']
