@@ -72,11 +72,10 @@ class rabbitmq(
   $key_content                = undef,
 
   ### START Hiera Lookups ###
-  $users            = hiera_hash('rabbitmq::rabbitmq_user', {}),
-  $user_permissions = hiera_hash('rabbitmq::rabbitmq_user_permissions', {}),
+  $users                      = hiera_hash('rabbitmq_user', {}),
+  $user_permissions           = hiera_hash('rabbitmq_user_permissions', {}),
   ### END Hiera Lookups ###
 ) inherits rabbitmq::params {
-
   validate_bool($admin_enable)
   # Validate install parameters.
   validate_re($package_apt_pin, '^(|\d+)$')
@@ -150,7 +149,7 @@ class rabbitmq(
   validate_hash($config_variables)
   validate_hash($config_kernel_variables)
   validate_hash($config_management_variables)
-  
+
   if $auth_backends {
     validate_array($auth_backends)
   }
@@ -278,8 +277,8 @@ class rabbitmq(
 
   # handle resources for hiera
 
-  create_resources('rabbitmq::rabbitmq_user', $users)
-  create_resources('rabbitmq::rabbitmq_user_permissions', $user_permissions)
+  create_resources('rabbitmq_user', $users)
+  create_resources('rabbitmq_user_permissions', $user_permissions)
 
   Anchor['rabbitmq::begin'] -> Class['::rabbitmq::install']
     -> Class['::rabbitmq::config'] ~> Class['::rabbitmq::service']
